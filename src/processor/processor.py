@@ -1,6 +1,6 @@
 import pandas as pd
 
-class Parser:
+class Processor:
     IGNORE = 'ignore'
 
     # def __init__(self, is_debit: bool) -> None:
@@ -17,7 +17,7 @@ class Parser:
         raise NotImplementedError
     
     def filter(self, df: pd.DataFrame) -> pd.DataFrame:
-        return df[df['category'] != Parser.IGNORE]
+        return df[df['category'] != Processor.IGNORE]
 
     def set_line_flags(self, df: pd.DataFrame) -> pd.DataFrame:
         df['is_income'] = df['category'].isin(['income'])
@@ -29,7 +29,7 @@ def word_contains_substring(word: str, substrings: list[str]) -> bool:
     return any(substring in word for substring in substrings)
 
 
-class BOAParser(Parser):
+class BOAProcessor(Processor):
     # def __init__(self) -> None:
     #     super(True)
 
@@ -65,7 +65,7 @@ class BOAParser(Parser):
             elif word_contains_substring(lowercase_desc, ["lightning elec"]):
                 return "utilities"
             elif word_contains_substring(lowercase_desc, ["credit card payment"]):
-                return Parser.IGNORE
+                return Processor.IGNORE
             else:
                 return "misc expenses"
         
@@ -83,7 +83,7 @@ class BOAParser(Parser):
 
             
 
-class ChaseParser(Parser):
+class ChaseProcessor(Processor):
     # def __init__(self) -> None:
     #     super(False)
     
@@ -127,14 +127,3 @@ class ChaseParser(Parser):
         })
         
         return df
-
-# df = pd.read_csv(
-#     'data.csv',
-#     sep=',',          # Default is comma
-#     header=0,         # Default is the first row
-#     names=['A', 'B', 'C'],  # Specify column names if no header
-#     index_col=0,      # Use the first column as the index
-#     usecols=['A', 'B'],  # Only read specific columns
-#     dtype={'A': int, 'B': float},  # Specify data types
-#     parse_dates=['date_column']  # Parse date columns
-# )

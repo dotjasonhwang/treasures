@@ -1,38 +1,21 @@
 import os
 import pandas as pd
-import time
-import sys
 
-from colorama import Fore, Back, Style, init
-from my_argparse import get_args
-from parser.parser import Parser, BOAParser, ChaseParser
+from colorama import Fore, Back, init
+from cli.argparse import get_args
+from cli.printer import print_line, color_string
+from cli.printer import print_message_with_checkmark
+from processor.processor import Processor, BOAProcessor, ChaseProcessor
 
-def the_line():
+def compute_line(household_size: int, percentile: int) -> float:
     return 5000
 
-
-def print_line():
-    print(Fore.GREEN + "-" * 50 + Style.RESET_ALL)
-
-
-def select_parser(filename: str) -> Parser:
+def select_processor(filename: str) -> Processor:
     if filename.startswith("boa"):
-        return BOAParser()
+        return BOAProcessor()
     if filename.startswith("chase"):
-        return ChaseParser()
+        return ChaseProcessor()
     raise Exception(filename)
-
-
-def print_message_with_checkmark(message, delay=3):
-    # Print the initial message without a newline and flush the buffer
-    print(f"{Fore.YELLOW + message + Style.RESET_ALL} ⏳", end='', flush=True)
-    
-    # Wait for the specified delay
-    time.sleep(delay)
-    
-    # Move the cursor back to the beginning of the line and overwrite the message
-    sys.stdout.write('\r' + message + Fore.GREEN + ' ✔' + Style.RESET_ALL + '\n')
-    sys.stdout.flush()
 
 
 def main():
@@ -50,7 +33,7 @@ def main():
         file_path = file_dir + '/' + os.fsdecode(filename)
 
         print_message_with_checkmark(f"\tReading {filename}")
-        parser = select_parser(filename)
+        parser = select_processor(filename)
         df = parser.parse(file_path)
         df = parser.categorize(df)
         df = parser.normalize(df)
@@ -81,28 +64,23 @@ def main():
     print_line()
 
     total_expenses = spending[~spending["over_line_item"]]["amount"].sum()
-    below_line = the_line() - total_expenses
-    print(f"Your line is {Back.BLUE} {the_line():.2f} {Style.RESET_ALL}")
+    line = compute_line(None, None)
+    below_line = line - total_expenses
+    print(f"Your line is { color_string(Back.BLUE, f"{line:.2f}") } ")
     if below_line > 0:
-        print(f"You were {Fore.GREEN} {below_line:.2f} {Style.RESET_ALL} below your finish line")
+        print(f"You were { color_string(Fore.GREEN, f"{below_line:.2f}") } below your finish line")
     elif below_line == 0:
         print("You were exactly on the JOG line!")
     else:
-        print(f"You were {Fore.RED} {(below_line * -1):.2f} {Style.RESET_ALL} above your finish line")
+        print(f"You were { color_string(Fore.RED, f"{(below_line * -1):.2f}") } above your finish line")
 
     total_above_line = spending[spending["over_line_item"]]["amount"].sum()
-    print(f"You have stored {Fore.YELLOW} {total_above_line:.2f} {Style.RESET_ALL} as treasure this month")
+    print(f"You have stored { color_string(Fore.YELLOW, f"{total_above_line:.2f}") } as treasure this month")
 
     print_line()
     print(combined_df.groupby(by="category")["amount"].sum())
 
     # 'commit' the change here to the file database
-
-    # print(f"""Starting NLFSlides...\n
-    # Using processor version: {args.version}
-    # Reading txt files from: {io_handler.input_folder_path()}
-    # Savings pptx files to: {io_handler.output_file_path()}\n""")
-
 
 if __name__ == "__main__":
     main()
