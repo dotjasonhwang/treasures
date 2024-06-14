@@ -10,11 +10,12 @@ from processor.processor import Processor, BOAProcessor, ChaseProcessor
 def compute_line(household_size: int, percentile: int) -> float:
     return 5000
 
+
 def select_processor(filename: str) -> Processor:
     if filename.startswith("boa"):
-        return BOAProcessor()
+        return BOAProcessor("boa")
     if filename.startswith("chase"):
-        return ChaseProcessor()
+        return ChaseProcessor("chase_saph")
     raise Exception(filename)
 
 
@@ -27,24 +28,25 @@ def main():
     args = get_args()
     file_dir = args.file_dir
 
-    dfs = []
+    dataframes = []
     print_message_with_checkmark("Opening folder")
     for filename in os.listdir(file_dir):
         file_path = file_dir + '/' + os.fsdecode(filename)
 
         print_message_with_checkmark(f"\tReading {filename}")
-        parser = select_processor(filename)
-        df = parser.parse(file_path)
-        df = parser.categorize(df)
-        df = parser.normalize(df)
-        df = parser.filter(df)
-        df = parser.set_line_flags(df)
-        df = df[df["date"] >= "2024-04-01"]
-        df = df[["date", "category", "amount", "is_income", "over_line_item"]]
+        processor = select_processor(filename)
+        df = processor.parse(file_path)
+        df = processor.categorize(df)
+        df = processor.normalize(df)
+        df = processor.filter(df)
+        df = processor.set_line_flags(df)
+        df["card_name"] = processor.card_name
         df["amount"] = abs(df["amount"])
-        dfs.append(df)
 
-    combined_df = pd.concat(dfs)
+        # duplicate check, and correction workflow
+        dataframes.append(df)
+
+    combined_df = pd.concat(dataframes)
     income = combined_df[combined_df["is_income"]]
     total_income = income["amount"].sum()
 
