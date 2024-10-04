@@ -1,7 +1,8 @@
 import pandas as pd
 
+
 class Processor:
-    IGNORE = 'ignore'
+    IGNORE = "ignore"
 
     def __init__(self, card_name: str) -> None:
         self.card_name = card_name
@@ -19,20 +20,38 @@ class Processor:
             "date", "category", "amount"
         """
         raise NotImplementedError
-    
+
     def filter(self, df: pd.DataFrame) -> pd.DataFrame:
-        return df[df['category'] != Processor.IGNORE]
+        """
+        Filter out any rows where category is Processor.IGNORE.
+        """
+        return df[df["category"] != Processor.IGNORE]
 
     def set_line_flags(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Output should have the columns:
             "date", "category", "amount", "is_income", "over_line_item"
         """
-        df['is_income'] = df['category'].isin(['income'])
-        df['over_line_item'] = df['category'].isin(["giving", "tithe"])
+        df["is_income"] = df["category"].isin(["income"])
+        df["over_line_item"] = df["category"].isin(["giving", "tithe"])
         return df
-    
+
     def word_contains_substring(self, word: str, substrings: list[str]) -> bool:
+        """
+        Checks if any of the substrings are in the given word.
+
+        Parameters
+        ----------
+        word : str
+            The word to check
+        substrings : list[str]
+            The list of substrings to check
+
+        Returns
+        -------
+        bool
+            True if any of the substrings are in the word, False otherwise.
+        """
         return any(substring in word for substring in substrings)
 
 
@@ -45,16 +64,12 @@ class BOAProcessor(Processor):
             file_path,
             header=5,
             usecols=["Date", "Description", "Amount"],
-            dtype=
-                {
-                    "Amount": float
-                },
-            parse_dates=['Date'],
-            thousands=',',
-            )
-        
-        return df
+            dtype={"Amount": float},
+            parse_dates=["Date"],
+            thousands=",",
+        )
 
+        return df
 
     def categorize(self, df: pd.DataFrame) -> pd.DataFrame:
         def categorize_row(row: pd.Series) -> str:
@@ -75,48 +90,42 @@ class BOAProcessor(Processor):
                 return Processor.IGNORE
             else:
                 return "misc expenses"
-        
 
         df["category"] = df.apply(categorize_row, axis=1)
         return df
-        
+
     def normalize(self, df: pd.DataFrame) -> pd.DataFrame:
-        df = df.rename(columns={
-            "Date": "date",
-            "Amount": "amount"
-        })
-
+        df = df.rename(columns={"Date": "date", "Amount": "amount"})
         df = df[["date", "category", "amount"]]
-
         return df
 
-            
 
 class ChaseProcessor(Processor):
     def __init__(self, card_name: str) -> None:
         super().__init__(card_name)
-    
+
     def parse(self, file_path: str) -> pd.DataFrame:
         df = pd.read_csv(
             file_path,
-            usecols=['Transaction Date', 'Description', 'Category', 'Type', 'Amount'],
-            dtype=
-                {
-                    "Amount": float
-                },
-            parse_dates=['Transaction Date'],
+            usecols=["Transaction Date", "Description", "Category", "Type", "Amount"],
+            dtype={"Amount": float},
+            parse_dates=["Transaction Date"],
         )
-        
+
         return df
 
     def categorize(self, df: pd.DataFrame) -> pd.DataFrame:
         def categorize_row(row: pd.Series) -> str:
             lowercase_desc = row["Description"].lower()
-            if self.word_contains_substring(lowercase_desc, ["automatic payment - thank"]):
+            if self.word_contains_substring(
+                lowercase_desc, ["automatic payment - thank"]
+            ):
                 return "card payment"
             elif self.word_contains_substring(lowercase_desc, ["amazon prime"]):
                 return "subscriptions"
-            elif self.word_contains_substring(lowercase_desc, ["computer", "amazon", "travel"]):
+            elif self.word_contains_substring(
+                lowercase_desc, ["computer", "amazon", "travel"]
+            ):
                 return "goods"
             elif self.word_contains_substring(lowercase_desc, ["heb", "costco"]):
                 return "groceries"
@@ -124,17 +133,11 @@ class ChaseProcessor(Processor):
                 return "dining"
             else:
                 return None
-        
 
         df["category"] = df.apply(categorize_row, axis=1)
         return df
 
     def normalize(self, df: pd.DataFrame) -> pd.DataFrame:
-        df = df.rename(columns={
-            "Transaction Date": "date",
-            "Amount": "amount"
-        })
-        
+        df = df.rename(columns={"Transaction Date": "date", "Amount": "amount"})
         df = df[["date", "category", "amount"]]
-
         return df

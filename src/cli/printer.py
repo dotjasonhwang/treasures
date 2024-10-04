@@ -4,21 +4,35 @@ import sys
 from colorama import Fore, Style
 from colorama.ansi import AnsiCodes
 
-def color_string(color: AnsiCodes, string: str) -> str:
-    return f"{color}{string}{Style.RESET_ALL}"
 
+class Printer:
+    def color_string(self, color: AnsiCodes, string: str) -> str:
+        """Formats a string with the given color and resets to default afterwards."""
+        return f"{color}{string}{Style.RESET_ALL}"
 
-def print_line():
-    print(color_string(Fore.GREEN, "-" * 50))
+    def format_delta(self, delta: str) -> str:
+        """Returns a red or green color string based on the sign of the given float value."""
+        color = Fore.RED if float(delta) < 0 else Fore.GREEN
+        return f"{color}{delta}{Style.RESET_ALL}"
 
+    def print_line(self) -> None:
+        """Prints a green line with 50 hyphens."""
+        print(self.color_string(Fore.GREEN, "-" * 50))
 
-def print_message_with_checkmark(message, delay=0.5):
-    # Print the initial message without a newline and flush the buffer
-    print(f"{color_string(Fore.YELLOW, message)} ⏳", end='', flush=True)
+    def print_message_with_checkmark(self, message: str, delay: float = 0.5) -> None:
+        """
+        Prints a message with a yellow color and a timer emoji, waits for the specified delay,
+        and then overwrites the message with the same text but with a green checkmark emoji.
 
-    # Wait for the specified delay
-    time.sleep(delay)
+        :param message: The message to display
+        :param delay: The delay in seconds (default: 0.5)
+        :return: None
+        """
+        print(f"{self.color_string(Fore.YELLOW, message)} ⏳", end="", flush=True)
 
-    # Move the cursor back to the beginning of the line and overwrite the message
-    sys.stdout.write('\r' + message + color_string(Fore.GREEN, ' ✔') + '\n')
-    sys.stdout.flush()
+        # Wait for the specified delay
+        time.sleep(delay)
+
+        # Move the cursor back to the beginning of the line and overwrite the message
+        sys.stdout.write("\r" + message + self.color_string(Fore.GREEN, " ✔") + "\n")
+        sys.stdout.flush()

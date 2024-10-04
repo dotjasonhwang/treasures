@@ -3,12 +3,9 @@ import pandas as pd
 
 from colorama import Fore, Back, init
 from cli.argparse import get_args
-from cli.printer import print_line, color_string
-from cli.printer import print_message_with_checkmark
+from cli.printer import Printer
+from engine.calculator import Calculator
 from processor.processor import Processor, BOAProcessor, ChaseProcessor
-
-def compute_line(household_size: int, percentile: int) -> float:
-    return 5000
 
 
 def select_processor(filename: str) -> Processor:
@@ -16,24 +13,24 @@ def select_processor(filename: str) -> Processor:
         return BOAProcessor("boa")
     if filename.startswith("chase"):
         return ChaseProcessor("chase_saph")
-    raise Exception(filename)
-
+    raise ValueError(f"Could not determine processor for {filename}")
 
 def main():
     # initialize colorama
     init()
+    printer = Printer()
 
-    print_message_with_checkmark("Starting up ")
+    printer.print_message_with_checkmark("Starting up ")
     
     args = get_args()
     file_dir = args.file_dir
 
     dataframes = []
-    print_message_with_checkmark("Opening folder")
+    printer.print_message_with_checkmark("Opening folder")
     for filename in os.listdir(file_dir):
-        file_path = file_dir + '/' + os.fsdecode(filename)
+        file_path = f"{file_dir}/{os.fsdecode(filename)}"
 
-        print_message_with_checkmark(f"\tReading {filename}")
+        printer.print_message_with_checkmark(f"\tReading {filename}")
         processor = select_processor(filename)
         df = processor.parse(file_path)
         df = processor.categorize(df)
@@ -47,40 +44,23 @@ def main():
         dataframes.append(df)
 
     combined_df = pd.concat(dataframes)
-    income = combined_df[combined_df["is_income"]]
-    total_income = income["amount"].sum()
+    calculator = Calculator(combined_df)
+    display_stats(printer, calculator)
 
-    spending = combined_df[~combined_df["is_income"]]
-    total_spending = spending["amount"].sum()
-
-    print_line()
-    print(f"In: {total_income:.2f}")
-    print(f"Out: {total_spending:.2f}")
-
-    surplus = total_income - total_spending
-    if surplus > 0:
-        print(f"Surplus: {surplus:.2f}")
-    else:
-        print(f"Deficit: {(surplus * -1):.2f}")
+def display_stats(printer: Printer, calculator: Calculator) -> None:
+    printer.print_line()
+    print(f"In: {calculator.income_total:.2f}")
+    print(f"Out: {calculator.out_total:.2f}")
+    print(f"In - Out: {printer.format_delta(f"{calculator.in_minus_out:.2f}")}")
     
-    print_line()
+    printer.print_line()
+    print(f"Your line is { printer.color_string(Back.BLUE, f"{calculator.line:.2f}") } ")
+    print(f"Line - Expenses: {printer.format_delta(f"{calculator.line_minus_expenses:.2f}")}")
+    print(f"You have stored { printer.color_string(Fore.YELLOW, f"{calculator.treasures_total:.2f}") } as treasure this month")
 
-    total_expenses = spending[~spending["over_line_item"]]["amount"].sum()
-    line = compute_line(None, None)
-    below_line = line - total_expenses
-    print(f"Your line is { color_string(Back.BLUE, f"{line:.2f}") } ")
-    if below_line > 0:
-        print(f"You were { color_string(Fore.GREEN, f"{below_line:.2f}") } below your finish line")
-    elif below_line == 0:
-        print("You were exactly on the JOG line!")
-    else:
-        print(f"You were { color_string(Fore.RED, f"{(below_line * -1):.2f}") } above your finish line")
-
-    total_above_line = spending[spending["over_line_item"]]["amount"].sum()
-    print(f"You have stored { color_string(Fore.YELLOW, f"{total_above_line:.2f}") } as treasure this month")
-
-    print_line()
-    print(combined_df.groupby(by="category")["amount"].sum())
+    printer.print_line()
+    
+    print(calculator.breakdown)
 
     # 'commit' the change here to the file database
 
