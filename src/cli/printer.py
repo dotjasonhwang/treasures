@@ -19,7 +19,7 @@ class Printer:
         """Prints a green line with 50 hyphens."""
         print(self.color_string(Fore.GREEN, "-" * 50))
 
-    def print_message_with_checkmark(self, message: str, delay: float = 0.5) -> None:
+    def print_message_with_checkmark(self, message: str, delay: float = 0.1) -> None:
         """
         Prints a message with a yellow color and a timer emoji, waits for the specified delay,
         and then overwrites the message with the same text but with a green checkmark emoji.

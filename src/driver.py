@@ -44,7 +44,7 @@ def main():
         dataframes.append(df)
 
     combined_df = pd.concat(dataframes)
-    calculator = Calculator(combined_df)
+    calculator = Calculator(args.household_size, args.percentile, combined_df)
     display_stats(printer, calculator)
 
 def display_stats(printer: Printer, calculator: Calculator) -> None:
