@@ -18,13 +18,11 @@ def select_processor(filename: str) -> Processor:
 def main():
     # initialize colorama
     init()
-    printer = Printer()
-
-    printer.print_message_with_checkmark("Starting up ")
-    
+    printer = Printer()    
     args = get_args()
     file_dir = args.file_dir
 
+    printer.print_message_with_checkmark("Starting up ")
     dataframes = []
     printer.print_message_with_checkmark("Opening folder")
     for filename in os.listdir(file_dir):
