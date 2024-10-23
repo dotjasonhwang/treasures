@@ -5,7 +5,7 @@ from flp.filing_status import FilingStatus
 
 class Dataset:
     def __init__(self, config_file="data/flp/numbers.json") -> None:
-        self.config_file = config_file
+        self._config_file = config_file
 
     def income_by_percentile(self) -> dict[int, float]:
         """
@@ -22,11 +22,6 @@ class Dataset:
         return self._load_config()["poverty"]["povLineBase"]
 
     def poverty_line_per_person(self) -> float:
-        """
-        Returns the amount the poverty line increases per person.
-
-        :return: The amount the poverty line increases per person.
-        """
         return self._load_config()["poverty"]["povLinePerPerson"]
 
     def avg_household_size(self) -> float:
@@ -46,7 +41,6 @@ class Dataset:
         }
 
     def state_income_tax_rate(self) -> float:
-        """Returns the state income tax rate as a float."""
         return self._load_config()["state_income_tax_rate"]
 
     def fica_soc_sec_rate(self) -> float:
@@ -75,5 +69,5 @@ class Dataset:
 
         :return: A dictionary with configuration values.
         """
-        with open(self.config_file, "r") as f:
+        with open(self._config_file, "r") as f:
             return json.load(f)

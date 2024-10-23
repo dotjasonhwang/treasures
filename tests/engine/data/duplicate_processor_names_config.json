@@ -1,0 +1,36 @@
+{
+  "file_nicknames": {
+    "bank1_debit1234": "Travel Card",
+    "bank2_credit1234": "Personal Card"
+  },
+  "processors": [
+    {
+      "name": "Processor 1",
+      "file_prefix": "prefix_1",
+      "file_format": "bank1",
+      "skip_transactions": [],
+      "categories": {
+        "income": {
+          "income source 1": ["payment_company_1"],
+          "income source 2": ["payment_company_2"]
+        },
+        "giving": { "non profit 1": ["volunteer 1"] },
+        "expense": { "misc expenses": ["payment_company_1_expense"] }
+      }
+    },
+    {
+      "name": "Processor 1",
+      "file_prefix": "prefix_2",
+      "file_format": "bank2",
+      "skip_transactions": ["miscellaneous"],
+      "categories": {
+        "income": {},
+        "giving": {},
+        "expense": {
+          "groceries": ["store_1", "store_2"],
+          "misc expenses": ["payment_company_1"]
+        }
+      }
+    }
+  ]
+}

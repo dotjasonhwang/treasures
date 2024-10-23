@@ -20,4 +20,11 @@ def get_args() -> argparse.Namespace:
         help="Location of the bank transactions",
         required=True,
     )
+    parser.add_argument(
+        "-c",
+        "--config_file",
+        help="Location of the config file, where processors are defined",
+        required=True,
+        default="data/config.json",
+    )
     return parser.parse_args()

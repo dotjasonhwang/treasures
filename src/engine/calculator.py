@@ -6,33 +6,41 @@ import pandas as pd
 class Calculator:
     """
     Performs the calculation on the given dataframe.
-    All relevant values should be made public by making them attributes
     """
 
-    def __init__(
-        self, household_size: int, percentile: int, combined_df: pd.DataFrame
-    ) -> None:
-        self.line = self.compute_monthly_line(household_size, percentile)
-
-        # TODO: Group by category and also purpose/bucket
-        self.breakdown = combined_df.groupby(by="category")["amount"].sum()
-
+    def __init__(self, household_size: int, percentile: int, df: pd.DataFrame) -> None:
         # Income
-        self.income_total = combined_df[combined_df["is_income"]]["amount"].sum()
-        # Non income
-        out = combined_df[~combined_df["is_income"]]
-        self.out_total = out["amount"].sum()
+        income_rows = df[df["type"] == "income"]
+        self.income_total = income_rows["amount"].sum()
+        self.income_by_category = income_rows.groupby(by="category")["amount"].sum()
+
+        # Expenses
+        expense_rows = df[df["type"] == "expense"]
+        expense_rows["amount"] *= -1
+        self.expense_total = expense_rows["amount"].sum()
+        self.expense_by_category = expense_rows.groupby(by="category")["amount"].sum()
+
+        # Giving
+        giving_rows = df[df["type"] == "giving"]
+        giving_rows["amount"] *= -1
+        self.giving_total = giving_rows["amount"].sum()
+        self.giving_by_category = giving_rows.groupby(by="category")["amount"].sum()
 
         # Cash leftover
-        self.in_minus_out = self.income_total - self.out_total
+        self.in_minus_out = self.income_total - self.expense_total - self.giving_total
 
-        # Line tracker values
-        self.expenses_total = out[~out["over_line_item"]]["amount"].sum()
-        self.line_minus_expenses = self.line - self.expenses_total
+        # Line
+        self.line = self._compute_monthly_line(household_size, percentile)
+        self.line_minus_expenses = self.line - self.expense_total
 
-        # Gold!
-        self.treasures_total = out[out["over_line_item"]]["amount"].sum()
+    def _compute_monthly_line(self, household_size: int, percentile: int) -> float:
+        """
+        Computes the monthly line (our budget goal) given the household size
+        and percentile.
 
-    def compute_monthly_line(self, household_size: int, percentile: int) -> float:
+        :param household_size: The number of people in the household.
+        :param percentile: The percentile to use for the calculation.
+        :return: The monthly line, which is the annual line divided by 12.
+        """
         flp_calculator = FLPCalculator(Dataset())
         return flp_calculator.compute_annual_line(household_size, percentile) / 12

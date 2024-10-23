@@ -56,7 +56,7 @@ from flp.flp_dataset import Dataset
 
 class FLPCalculator:
     def __init__(self, dataset: Dataset) -> None:
-        self.dataset = dataset
+        self._dataset = dataset
 
     def compute_annual_line(self, household_size: int, percentile: int) -> float:
         if household_size <= 0:
@@ -69,19 +69,19 @@ class FLPCalculator:
             FilingStatus.INDIVIDUAL if household_size == 1 else FilingStatus.JOINT
         )
 
-        scaled_gross_income = self.calculate_scaled_income(household_size, percentile)
+        scaled_gross_income = self._calculate_scaled_income(household_size, percentile)
 
-        federal_income_tax = self.calculate_federal_income_tax(
-            self.calculate_federal_taxable_income(scaled_gross_income, filing_status),
+        federal_income_tax = self._calculate_federal_income_tax(
+            self._calculate_federal_taxable_income(scaled_gross_income, filing_status),
             filing_status,
         )
 
-        fica_tax = self.calculate_fica_tax(scaled_gross_income)
+        fica_tax = self._calculate_fica_tax(scaled_gross_income)
 
-        state_tax = self.calculate_state_tax(scaled_gross_income)
+        state_tax = self._calculate_state_tax(scaled_gross_income)
         return scaled_gross_income - federal_income_tax - fica_tax - state_tax
 
-    def calculate_scaled_income(
+    def _calculate_scaled_income(
         self,
         household_size: int,
         percentile: int,
@@ -90,19 +90,22 @@ class FLPCalculator:
         Calculates the scaled income, which is the income adjusted to the household size
         using the poverty line as a reference of the curve.
         """
-        unscaled_income_for_percentile = self.dataset.income_by_percentile()[percentile]
+        unscaled_income_for_percentile = self._dataset.income_by_percentile()[
+            percentile
+        ]
 
         scale = unscaled_income_for_percentile / (
-            self.dataset.poverty_line_base()
-            + self.dataset.poverty_line_per_person() * self.dataset.avg_household_size()
+            self._dataset.poverty_line_base()
+            + self._dataset.poverty_line_per_person()
+            * self._dataset.avg_household_size()
         )
         scaled_income = (
-            self.dataset.poverty_line_base()
-            + self.dataset.poverty_line_per_person() * household_size
+            self._dataset.poverty_line_base()
+            + self._dataset.poverty_line_per_person() * household_size
         ) * scale
         return round(scaled_income)
 
-    def calculate_federal_taxable_income(
+    def _calculate_federal_taxable_income(
         self, gross_income: float, filing_status: FilingStatus
     ) -> float:
         """
@@ -112,9 +115,9 @@ class FLPCalculator:
         if gross_income < 0:
             raise ValueError("Gross income must be non-negative.")
 
-        return max(0, gross_income - self.dataset.deductions()[filing_status])
+        return max(0, gross_income - self._dataset.deductions()[filing_status])
 
-    def calculate_federal_income_tax(
+    def _calculate_federal_income_tax(
         self, taxable_income: float, filing_status: FilingStatus
     ) -> float:
         """
@@ -132,7 +135,7 @@ class FLPCalculator:
             raise ValueError("Taxable income must be non-negative.")
 
         tax_owed = 0.0
-        for lower, upper, rate in self.dataset.federal_tax_brackets()[
+        for lower, upper, rate in self._dataset.federal_tax_brackets()[
             filing_status
         ].itertuples(index=False):
             if taxable_income > lower:
@@ -142,7 +145,7 @@ class FLPCalculator:
                 break
         return tax_owed
 
-    def calculate_fica_tax(self, gross_income: float) -> float:
+    def _calculate_fica_tax(self, gross_income: float) -> float:
         """
         Calculates the FICA tax (social security and medicare) based on the given gross income.
 
@@ -159,11 +162,11 @@ class FLPCalculator:
             raise ValueError("Gross income must be non-negative.")
 
         social_security_tax = (
-            min(gross_income, self.dataset.fica_soc_sec_max_income())
-            * self.dataset.fica_soc_sec_rate()
+            min(gross_income, self._dataset.fica_soc_sec_max_income())
+            * self._dataset.fica_soc_sec_rate()
         )
 
-        medicare_tax = gross_income * self.dataset.fica_medicare_rate()
+        medicare_tax = gross_income * self._dataset.fica_medicare_rate()
 
         # Additional Medicare tax, currently not applied to apply, uncomment the below lines and add it to the final sum
         # if gross_income > additional_medicare_threshold:
@@ -171,7 +174,7 @@ class FLPCalculator:
 
         return social_security_tax + medicare_tax
 
-    def calculate_state_tax(self, gross_income: float) -> float:
+    def _calculate_state_tax(self, gross_income: float) -> float:
         """
         Calculates the state tax based on the given gross income.
 
@@ -183,4 +186,4 @@ class FLPCalculator:
         if gross_income < 0:
             raise ValueError("Gross income must be non-negative.")
 
-        return self.dataset.state_income_tax_rate() * gross_income
+        return self._dataset.state_income_tax_rate() * gross_income

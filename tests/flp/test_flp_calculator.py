@@ -53,7 +53,7 @@ class BaseFLPCalculatorTest(unittest.TestCase):
 class TestCalculateScaledIncome(BaseFLPCalculatorTest):
     def test_webpage_example(self):
         # Using the example on the webpage as of 20241005
-        self.assertEqual(self.calculator.calculate_scaled_income(4, 50), 85903)
+        self.assertEqual(self.calculator._calculate_scaled_income(4, 50), 85903)
 
 
 class TestCalculateFederalTaxableIncome(BaseFLPCalculatorTest):
@@ -61,7 +61,7 @@ class TestCalculateFederalTaxableIncome(BaseFLPCalculatorTest):
         gross_income = 10000
         filing_status = FilingStatus.INDIVIDUAL
         self.assertEqual(
-            self.calculator.calculate_federal_taxable_income(
+            self.calculator._calculate_federal_taxable_income(
                 gross_income, filing_status
             ),
             0,
@@ -71,7 +71,7 @@ class TestCalculateFederalTaxableIncome(BaseFLPCalculatorTest):
         gross_income = 13850
         filing_status = FilingStatus.INDIVIDUAL
         self.assertEqual(
-            self.calculator.calculate_federal_taxable_income(
+            self.calculator._calculate_federal_taxable_income(
                 gross_income, filing_status
             ),
             0,
@@ -81,7 +81,7 @@ class TestCalculateFederalTaxableIncome(BaseFLPCalculatorTest):
         gross_income = 20000
         filing_status = FilingStatus.INDIVIDUAL
         self.assertEqual(
-            self.calculator.calculate_federal_taxable_income(
+            self.calculator._calculate_federal_taxable_income(
                 gross_income, filing_status
             ),
             6150,
@@ -91,7 +91,7 @@ class TestCalculateFederalTaxableIncome(BaseFLPCalculatorTest):
         gross_income = 30000
         filing_status = FilingStatus.JOINT
         self.assertEqual(
-            self.calculator.calculate_federal_taxable_income(
+            self.calculator._calculate_federal_taxable_income(
                 gross_income, filing_status
             ),
             2300,
@@ -101,7 +101,7 @@ class TestCalculateFederalTaxableIncome(BaseFLPCalculatorTest):
         gross_income = -1
         filing_status = FilingStatus.JOINT
         with self.assertRaises(ValueError):
-            self.calculator.calculate_federal_taxable_income(
+            self.calculator._calculate_federal_taxable_income(
                 gross_income, filing_status
             )
 
@@ -111,7 +111,9 @@ class TestCalculateFederalIncomeTax(BaseFLPCalculatorTest):
         taxable_income = 10000
         filing_status = FilingStatus.INDIVIDUAL
         self.assertAlmostEqual(
-            self.calculator.calculate_federal_income_tax(taxable_income, filing_status),
+            self.calculator._calculate_federal_income_tax(
+                taxable_income, filing_status
+            ),
             1000,
         )
 
@@ -119,7 +121,9 @@ class TestCalculateFederalIncomeTax(BaseFLPCalculatorTest):
         taxable_income = 50000
         filing_status = FilingStatus.INDIVIDUAL
         self.assertAlmostEqual(
-            self.calculator.calculate_federal_income_tax(taxable_income, filing_status),
+            self.calculator._calculate_federal_income_tax(
+                taxable_income, filing_status
+            ),
             6307.5,
         )
 
@@ -127,7 +131,9 @@ class TestCalculateFederalIncomeTax(BaseFLPCalculatorTest):
         taxable_income = 200000
         filing_status = FilingStatus.INDIVIDUAL
         self.assertAlmostEqual(
-            self.calculator.calculate_federal_income_tax(taxable_income, filing_status),
+            self.calculator._calculate_federal_income_tax(
+                taxable_income, filing_status
+            ),
             42832.0,
         )
 
@@ -135,7 +141,9 @@ class TestCalculateFederalIncomeTax(BaseFLPCalculatorTest):
         taxable_income = 50000
         filing_status = FilingStatus.JOINT
         self.assertAlmostEqual(
-            self.calculator.calculate_federal_income_tax(taxable_income, filing_status),
+            self.calculator._calculate_federal_income_tax(
+                taxable_income, filing_status
+            ),
             5560.0,
         )
 
@@ -143,7 +151,9 @@ class TestCalculateFederalIncomeTax(BaseFLPCalculatorTest):
         taxable_income = 0
         filing_status = FilingStatus.INDIVIDUAL
         self.assertAlmostEqual(
-            self.calculator.calculate_federal_income_tax(taxable_income, filing_status),
+            self.calculator._calculate_federal_income_tax(
+                taxable_income, filing_status
+            ),
             0,
         )
 
@@ -151,28 +161,28 @@ class TestCalculateFederalIncomeTax(BaseFLPCalculatorTest):
         taxable_income = -1000
         filing_status = FilingStatus.INDIVIDUAL
         with self.assertRaises(ValueError):
-            self.calculator.calculate_federal_income_tax(taxable_income, filing_status)
+            self.calculator._calculate_federal_income_tax(taxable_income, filing_status)
 
 
 class TestCalculateFICA(BaseFLPCalculatorTest):
     def test_zero_income(self):
         gross_income = 0
         self.assertAlmostEqual(
-            self.calculator.calculate_fica_tax(gross_income),
+            self.calculator._calculate_fica_tax(gross_income),
             0,
         )
 
     def test_at_max_social_security_threshold(self):
         gross_income = 160200
         self.assertAlmostEqual(
-            self.calculator.calculate_fica_tax(gross_income),
+            self.calculator._calculate_fica_tax(gross_income),
             12255.3,
         )
 
     def test_above_max_social_security_threshold(self):
         gross_income = 200000
         self.assertAlmostEqual(
-            self.calculator.calculate_fica_tax(gross_income),
+            self.calculator._calculate_fica_tax(gross_income),
             12832.4,
         )
 
@@ -181,53 +191,53 @@ class TestCalculateStateTax(BaseFLPCalculatorTest):
     def test_zero_income(self):
         gross_income = 0
         self.assertAlmostEqual(
-            self.calculator.calculate_state_tax(gross_income),
+            self.calculator._calculate_state_tax(gross_income),
             0,
         )
 
     def test_income(self):
         gross_income = 100000
         self.assertAlmostEqual(
-            self.calculator.calculate_state_tax(gross_income),
+            self.calculator._calculate_state_tax(gross_income),
             3400,
         )
 
 
 class TestComputeMonthlyLine(BaseFLPCalculatorTest):
-    def test_compute_monthly_line_invalid_household_size(self):
+    def test_compute_annual_line_invalid_household_size(self):
         household_size = 0
         percentile = 50
         with self.assertRaises(ValueError):
-            self.calculator.compute_monthly_line(household_size, percentile)
+            self.calculator.compute_annual_line(household_size, percentile)
 
-    def test_compute_monthly_line_invalid_percentile(self):
+    def test_compute_annual_line_invalid_percentile(self):
         household_size = 1
         with self.assertRaises(ValueError):
-            self.calculator.compute_monthly_line(household_size, 100)
+            self.calculator.compute_annual_line(household_size, 100)
 
         with self.assertRaises(ValueError):
-            self.calculator.compute_monthly_line(household_size, 0)
+            self.calculator.compute_annual_line(household_size, 0)
 
-    def test_compute_monthly_line_individual(self):
+    def test_compute_annual_line_individual(self):
         household_size = 1
         percentile = 50
-        monthly_line = self.calculator.compute_monthly_line(household_size, percentile)
+        monthly_line = self.calculator.compute_annual_line(household_size, percentile)
         self.assertAlmostEqual(monthly_line, 33853.186)
 
-    def test_compute_monthly_line_joint(self):
+    def test_compute_annual_line_joint(self):
         household_size = 2
         percentile = 50
-        monthly_line = self.calculator.compute_monthly_line(household_size, percentile)
+        monthly_line = self.calculator.compute_annual_line(household_size, percentile)
         self.assertAlmostEqual(monthly_line, 47112.2435)
 
-    def test_compute_monthly_line_individual_2(self):
+    def test_compute_annual_line_individual_2(self):
         household_size = 1
         percentile = 25
-        monthly_line = self.calculator.compute_monthly_line(household_size, percentile)
+        monthly_line = self.calculator.compute_annual_line(household_size, percentile)
         self.assertAlmostEqual(monthly_line, 16755.7755)
 
-    def test_compute_monthly_line_joint_2(self):
+    def test_compute_annual_line_joint_2(self):
         household_size = 2
         percentile = 25
-        monthly_line = self.calculator.compute_monthly_line(household_size, percentile)
+        monthly_line = self.calculator.compute_annual_line(household_size, percentile)
         self.assertAlmostEqual(monthly_line, 23480.1315)

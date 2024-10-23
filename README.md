@@ -76,11 +76,11 @@ SOFTWARE.
 
 ## About
 
-The year is 2023. I am working on my budgeting game. Commercial applications are a bit too centralized and un-customizable for a software nerd like myself. I am also growing in my relationship with money, and I come across the [The Finish Line Pledge](https://www.finishlinepledge.com).
+The year is 2023. I am working on my budgeting game. Commercial applications are a bit too centralized and un-customizable for a software nerd like myself. I am also growing in my relationship with money, and I come across the [The Finish Line Pledge](https://www.finishlinepledge.com). Combining these two threads, **Treasures** is born.
 
-In the spring of 2024, at a creative getaway weekend, I combined these two threads and started working on **Treasures**. **Treasures** takes transaction sheets and consolidates a monthly budget breakdown, and the bottom line metric is based off your personal "financial finish line".
+**Treasures** takes transaction sheets and consolidates a monthly budget breakdown, and the bottom line metric is based on your personal "financial finish line". The intent was to use the finish line metric to direct the focus of the budgeting from storing treasures on earth to storing them in heaven.
 
-The Financial Finish Line is a monthly number that the Finish Line Pledge computes using household size, target percentile, and a variety of data sources. Please see [The Finish Line Pledge](https://www.finishlinepledge.com) for a more thorough breakdown, as well as a wealth of valuable content and resources.
+The Financial Finish Line is a monthly number that the Finish Line Pledge computes using household size, target percentile, and a variety of data sources. See [The Finish Line Pledge](https://www.finishlinepledge.com) for a full breakdown as well as a wealth of valuable content and resources.
 
 Matthew 6:19-21:
 “Do not store up for yourselves treasures on earth, where moths and vermin destroy, and where thieves break in and steal. But store up for yourselves treasures in heaven, where moths and vermin do not destroy, and where thieves do not break in and steal. For where your treasure is, there your heart will be also."
@@ -97,7 +97,7 @@ Matthew 6:19-21:
 ## Usage
 
 ```
-usage: driver.py [-h] -n HOUSEHOLD_SIZE -p PERCENTILE -f FILE_DIR
+usage: driver.py [-h] -n HOUSEHOLD_SIZE -p PERCENTILE -f FILE_DIR -c CONFIG_FILE
 
 Treasures
 
@@ -109,10 +109,12 @@ options:
                         Target percentile of income
   -f FILE_DIR, --file_dir FILE_DIR
                         Location of the bank transactions
+  -c CONFIG_FILE, --config_file CONFIG_FILE
+                        Location of the config file, where processors are defined
 ```
 
 Example:
-`python3 src/driver.py -n 2 -p 50 -f my_transactions_folder/2024/01/01/`
+`python3 src/driver.py -n 2 -p 50 -f my_transactions_folder/2024/01/01/ -c data/my_config_file.json`
 
 ## Built With
 
