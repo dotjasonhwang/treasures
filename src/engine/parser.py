@@ -2,17 +2,15 @@ import pandas as pd
 
 
 class Parser:
-    def __init__(self, account_name: str, income_is_positive: bool) -> None:
+    def __init__(self, income_is_positive: bool) -> None:
         """
-        Initializes the Parser with the given account name and whether the raw file
+        Initializes the Parser with a flag indicating whether the raw file
         contains income as positive. If and only if income_is_positive is False,
         the amount will be flipped so that income is positive and expenses are negative.
 
-        :param account_name: The name of the account associated with the parser.
         :param income_is_positive: A boolean indicating whether income is positive
             in the raw file.
         """
-        self.account_name = account_name
         self.income_is_positive = income_is_positive
 
     def parse_and_normalize_column_names(self, file_path: str) -> pd.DataFrame:
@@ -78,9 +76,9 @@ class Parser:
         raise NotImplementedError
 
 
-class BOAParser(Parser):
-    def __init__(self, account_name: str, income_is_positive: bool) -> None:
-        super().__init__(account_name, income_is_positive)
+class BOADebitParser(Parser):
+    def __init__(self) -> None:
+        super().__init__(True)
 
     def _parse(self, file_path: str) -> pd.DataFrame:
         df = pd.read_csv(
@@ -98,9 +96,9 @@ class BOAParser(Parser):
         return df
 
 
-class ChaseParser(Parser):
-    def __init__(self, account_name: str, income_is_positive: bool) -> None:
-        super().__init__(account_name, income_is_positive)
+class ChaseCreditParser(Parser):
+    def __init__(self) -> None:
+        super().__init__(True)
 
     def _parse(self, file_path: str) -> pd.DataFrame:
         df = pd.read_csv(
@@ -109,8 +107,15 @@ class ChaseParser(Parser):
             dtype={"Amount": float},
             parse_dates=["Transaction Date"],
         )
+        return df
 
     def _rename_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        df = df.rename(
+            columns={
+                "Transaction Date": "date",
+                "Category": "chase_category",
+                "Type": "chase_type",
+            }
+        )
         df.columns = df.columns.str.lower()
-        df = df.rename(columns={"transaction date": "date"})
         return df

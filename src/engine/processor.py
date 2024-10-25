@@ -1,4 +1,5 @@
 from engine.parser import Parser
+from engine.type import Type
 import pandas as pd
 import logging
 
@@ -6,7 +7,6 @@ logger = logging.getLogger(__name__)
 
 
 class Processor:
-    NO_TYPE = "no type"
     NO_CATEGORY = "no category"
 
     def __init__(
@@ -76,7 +76,12 @@ class Processor:
         :param df: A pandas DataFrame with a "description" column containing transaction details.
         :return: A DataFrame with additional columns for "type" and "category".
         """
-        return df.apply(lambda row: pd.Series(self._categorize_row(row)), axis=1)
+        applied_df = df.apply(
+            lambda row: self._categorize_row(row),
+            axis="columns",
+            result_type="expand",
+        )
+        return pd.concat([df, applied_df], axis="columns")
 
     def _categorize_row(self, row: pd.Series) -> str:
         """
@@ -98,7 +103,7 @@ class Processor:
         )
         if not matching_identifiers:
             logger.info(f"No category found for {row['description']}")
-            return {"type": Processor.NO_TYPE, "category": Processor.NO_CATEGORY}
+            return {"type": Type.NO_TYPE, "category": Processor.NO_CATEGORY}
 
         if len(matching_identifiers) > 1:
             type_categories = set()

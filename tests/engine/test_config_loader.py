@@ -7,7 +7,9 @@ from engine.processor import Processor
 class BaseConfigLoaderTest(unittest.TestCase):
     def setUp(self):
         mock_parser_by_format = {"bank1": "mock_parser1", "bank2": "mock_parser2"}
-        test_config_file = str(pathlib.Path(__file__).parent / "data/valid_config.json")
+        test_config_file = str(
+            pathlib.Path(__file__).parent.parent / "data/valid_config.json"
+        )
         self.config_loader = ConfigLoader(test_config_file, mock_parser_by_format)
 
 
@@ -52,7 +54,8 @@ class TestLoadProcessors(BaseConfigLoaderTest):
 
     def test_invalid_config(self):
         test_config_file = str(
-            pathlib.Path(__file__).parent / "data/duplicate_processor_names_config.json"
+            pathlib.Path(__file__).parent.parent
+            / "data/duplicate_processor_names_config.json"
         )
         config_loader = ConfigLoader(test_config_file, {})
         with self.assertRaises(ValueError):

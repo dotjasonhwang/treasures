@@ -1,6 +1,7 @@
 import unittest
 import pandas as pd
 from engine.processor import Processor
+from engine.type import Type
 
 
 class BaseProcessorTest(unittest.TestCase):
@@ -81,7 +82,7 @@ class TestCategorize(BaseProcessorTest):
     def test_no_matching_identifiers(self):
         df = pd.DataFrame({"description": ["No matching identifier"]})
         result = self.processor1.categorize(df)
-        self.assertEqual(result["type"].tolist(), [Processor.NO_TYPE])
+        self.assertEqual(result["type"].tolist(), [Type.NO_TYPE])
         self.assertEqual(result["category"].tolist(), [Processor.NO_CATEGORY])
 
     def test_one_matching_identifier(self):
@@ -109,7 +110,7 @@ class TestCategorizeRow(BaseProcessorTest):
         row = pd.Series({"description": "No matching identifier"})
         result = self.processor1._categorize_row(row)
         self.assertEqual(
-            result, {"type": Processor.NO_TYPE, "category": Processor.NO_CATEGORY}
+            result, {"type": Type.NO_TYPE, "category": Processor.NO_CATEGORY}
         )
 
     def test_one_matching_identifier(self):
