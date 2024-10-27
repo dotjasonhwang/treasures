@@ -8,13 +8,13 @@ from flp.filing_status import FilingStatus
 
 class BaseFLPCalculatorTest(unittest.TestCase):
     def setUp(self):
-        self.dataset = MagicMock()
-        self.dataset.income_by_percentile.return_value = {25: 30000, 50: 64021}
-        self.dataset.poverty_line_base.return_value = 7820
-        self.dataset.poverty_line_per_person.return_value = 4320
-        self.dataset.avg_household_size.return_value = 2.52
+        self._dataset = MagicMock()
+        self._dataset.income_by_percentile.return_value = {25: 30000, 50: 64021}
+        self._dataset.poverty_line_base.return_value = 7820
+        self._dataset.poverty_line_per_person.return_value = 4320
+        self._dataset.avg_household_size.return_value = 2.52
 
-        self.dataset.federal_tax_brackets.return_value = {
+        self._dataset.federal_tax_brackets.return_value = {
             FilingStatus.INDIVIDUAL: pd.DataFrame(
                 [
                     {"lower": 0, "upper": 11000, "rate": 0.10},
@@ -38,16 +38,16 @@ class BaseFLPCalculatorTest(unittest.TestCase):
                 ]
             ),
         }
-        self.dataset.state_income_tax_rate.return_value = 0.034
-        self.dataset.fica_soc_sec_rate.return_value = 0.062
-        self.dataset.fica_soc_sec_max_income.return_value = 160200
-        self.dataset.fica_medicare_rate.return_value = 0.0145
-        self.dataset.deductions.return_value = {
+        self._dataset.state_income_tax_rate.return_value = 0.034
+        self._dataset.fica_soc_sec_rate.return_value = 0.062
+        self._dataset.fica_soc_sec_max_income.return_value = 160200
+        self._dataset.fica_medicare_rate.return_value = 0.0145
+        self._dataset.deductions.return_value = {
             FilingStatus.INDIVIDUAL: 13850,
             FilingStatus.JOINT: 27700,
         }
 
-        self.calculator = FLPCalculator(self.dataset)
+        self.calculator = FLPCalculator(self._dataset)
 
 
 class TestCalculateScaledIncome(BaseFLPCalculatorTest):

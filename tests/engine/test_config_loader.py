@@ -10,14 +10,14 @@ class BaseConfigLoaderTest(unittest.TestCase):
         test_config_file = str(
             pathlib.Path(__file__).parent.parent / "data/valid_config.json"
         )
-        self.config_loader = ConfigLoader(test_config_file, mock_parser_by_format)
+        self._config_loader = ConfigLoader(test_config_file, mock_parser_by_format)
 
 
 class TestLoadNicknames(BaseConfigLoaderTest):
     def test_expected(self):
         self.assertEqual(
             {"bank1_debit1234": "Travel Card", "bank2_credit1234": "Personal Card"},
-            self.config_loader.load_nickname_by_filename(),
+            self._config_loader.load_nickname_by_filename(),
         )
 
 
@@ -49,7 +49,7 @@ class TestLoadProcessors(BaseConfigLoaderTest):
                     },
                 ),
             ],
-            self.config_loader.load_processors(),
+            self._config_loader.load_processors(),
         )
 
     def test_invalid_config(self):
@@ -66,12 +66,12 @@ class TestExtractParser(BaseConfigLoaderTest):
     def test_expected(self):
         self.assertEqual(
             "mock_parser1",
-            self.config_loader._extract_parser("bank1", "mock_name"),
+            self._config_loader._extract_parser("bank1", "mock_name"),
         )
 
     def test_invalid_processor(self):
         with self.assertRaises(ValueError):
-            self.config_loader._extract_parser("unknown_bank", "mock_name")
+            self._config_loader._extract_parser("unknown_bank", "mock_name")
 
 
 class TestExtractInvertedCategories(BaseConfigLoaderTest):
@@ -94,7 +94,7 @@ class TestExtractInvertedCategories(BaseConfigLoaderTest):
 
         self.assertEqual(
             expected_result,
-            self.config_loader._extract_inverted_categories(categories1, "mock_name"),
+            self._config_loader._extract_inverted_categories(categories1, "mock_name"),
         )
 
     def test_expected_convert_lowercase(self):
@@ -116,12 +116,12 @@ class TestExtractInvertedCategories(BaseConfigLoaderTest):
 
         self.assertEqual(
             expected_result,
-            self.config_loader._extract_inverted_categories(categories1, "mock_name"),
+            self._config_loader._extract_inverted_categories(categories1, "mock_name"),
         )
 
     def test_no_categories(self):
         self.assertEqual(
-            {}, self.config_loader._extract_inverted_categories({}, "mock_name")
+            {}, self._config_loader._extract_inverted_categories({}, "mock_name")
         )
 
     def test_invalid_processor(self):
@@ -134,7 +134,7 @@ class TestExtractInvertedCategories(BaseConfigLoaderTest):
             },
         }
         with self.assertRaises(ValueError):
-            self.config_loader._extract_inverted_categories(
+            self._config_loader._extract_inverted_categories(
                 invalid_categories, "mock_name"
             )
 
@@ -154,12 +154,12 @@ class TestInvertDict(BaseConfigLoaderTest):
         }
 
         self.assertEqual(
-            expected_result, self.config_loader._invert_dict(dict_to_invert)
+            expected_result, self._config_loader._invert_dict(dict_to_invert)
         )
 
     def test_empty_dict(self):
         dict_to_invert = {}
-        self.assertEqual({}, self.config_loader._invert_dict(dict_to_invert))
+        self.assertEqual({}, self._config_loader._invert_dict(dict_to_invert))
 
     def test_duplicate_inner_items(self):
         dict_to_invert = {
@@ -173,35 +173,37 @@ class TestInvertDict(BaseConfigLoaderTest):
         }
 
         self.assertEqual(
-            expected_result, self.config_loader._invert_dict(dict_to_invert)
+            expected_result, self._config_loader._invert_dict(dict_to_invert)
         )
 
 
 class TestErrorIfDuplicateNames(BaseConfigLoaderTest):
     def test_no_duplicates(self):
         processor_configs = [{"name": "a"}, {"name": "b"}, {"name": "c"}]
-        self.config_loader._error_if_duplicate_names(processor_configs)
+        self._config_loader._error_if_duplicate_names(processor_configs)
 
     def test_with_duplicates(self):
         processor_configs = [{"name": "a"}, {"name": "b"}, {"name": "b"}]
         with self.assertRaises(ValueError):
-            self.config_loader._error_if_duplicate_names(processor_configs)
+            self._config_loader._error_if_duplicate_names(processor_configs)
 
     def test_empty_list(self):
         processor_configs = []
-        self.config_loader._error_if_duplicate_names(processor_configs)
+        self._config_loader._error_if_duplicate_names(processor_configs)
 
 
 class TestFindDuplicates(BaseConfigLoaderTest):
 
     def test_no_duplicates(self):
         list_of_items = ["a", "b", "c"]
-        self.assertEqual([], self.config_loader._find_duplicates(list_of_items))
+        self.assertEqual([], self._config_loader._find_duplicates(list_of_items))
 
     def test_with_duplicates(self):
         list_of_items = ["a", "b", "b", "c", "c", "c"]
-        self.assertEqual(["b", "c"], self.config_loader._find_duplicates(list_of_items))
+        self.assertEqual(
+            ["b", "c"], self._config_loader._find_duplicates(list_of_items)
+        )
 
     def test_empty_list(self):
         list_of_items = []
-        self.assertEqual([], self.config_loader._find_duplicates(list_of_items))
+        self.assertEqual([], self._config_loader._find_duplicates(list_of_items))

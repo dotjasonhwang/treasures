@@ -11,7 +11,7 @@ class Parser:
         :param income_is_positive: A boolean indicating whether income is positive
             in the raw file.
         """
-        self.income_is_positive = income_is_positive
+        self._income_is_positive = income_is_positive
 
     def parse_and_normalize_column_names(self, file_path: str) -> pd.DataFrame:
         """
@@ -34,7 +34,7 @@ class Parser:
         """
         df = self._parse(file_path)
         df = self._rename_columns(df)
-        if not self.income_is_positive:
+        if not self._income_is_positive:
             df["amount"] *= -1
         return df
 

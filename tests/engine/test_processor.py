@@ -6,7 +6,7 @@ from engine.type import Type
 
 class BaseProcessorTest(unittest.TestCase):
     def setUp(self):
-        self.processor1 = Processor(
+        self._processor1 = Processor(
             name="Bank1 Debit",
             file_prefix="bank1_debit",
             parser="mock_parser1",
@@ -18,7 +18,7 @@ class BaseProcessorTest(unittest.TestCase):
                 "payment_company_1_expense": ("expense", "misc expenses"),
             },
         )
-        self.processor2 = Processor(
+        self._processor2 = Processor(
             name="Bank2 Credit",
             file_prefix="bank2_credit",
             parser="mock_parser2",
@@ -45,10 +45,10 @@ class TestEQ(BaseProcessorTest):
                 "payment_company_1_expense": ("expense", "misc expenses"),
             },
         )
-        self.assertEqual(self.processor1, processor1Equivalent)
+        self.assertEqual(self._processor1, processor1Equivalent)
 
     def test_neq(self):
-        self.assertNotEqual(self.processor1, self.processor2)
+        self.assertNotEqual(self._processor1, self._processor2)
 
 
 class TestRemoveSkippedTransactions(BaseProcessorTest):
@@ -63,7 +63,7 @@ class TestRemoveSkippedTransactions(BaseProcessorTest):
                 ]
             }
         )
-        result = self.processor1.remove_skipped_transactions(df)
+        result = self._processor1.remove_skipped_transactions(df)
         self.assertEqual(len(result), 2)
         self.assertEqual(
             result["description"].tolist(), ["manual pay 1", "random pay 2"]
@@ -71,7 +71,7 @@ class TestRemoveSkippedTransactions(BaseProcessorTest):
 
     def test_not_found(self):
         df = pd.DataFrame({"description": ["manual pay 1", "random pay 2"]})
-        result = self.processor1.remove_skipped_transactions(df)
+        result = self._processor1.remove_skipped_transactions(df)
         self.assertEqual(len(result), 2)
         self.assertEqual(
             result["description"].tolist(), ["manual pay 1", "random pay 2"]
@@ -81,13 +81,13 @@ class TestRemoveSkippedTransactions(BaseProcessorTest):
 class TestCategorize(BaseProcessorTest):
     def test_no_matching_identifiers(self):
         df = pd.DataFrame({"description": ["No matching identifier"]})
-        result = self.processor1.categorize(df)
+        result = self._processor1.categorize(df)
         self.assertEqual(result["type"].tolist(), [Type.NO_TYPE])
         self.assertEqual(result["category"].tolist(), [Processor.NO_CATEGORY])
 
     def test_one_matching_identifier(self):
         df = pd.DataFrame({"description": ["Contains payment_company_1"]})
-        result = self.processor1.categorize(df)
+        result = self._processor1.categorize(df)
         self.assertEqual(result["type"].tolist(), ["income"])
         self.assertEqual(result["category"].tolist(), ["income source 1"])
 
@@ -96,11 +96,11 @@ class TestCategorize(BaseProcessorTest):
             {"description": ["Contains payment_company_1 and payment_company_2"]}
         )
         with self.assertRaises(ValueError):
-            self.processor1.categorize(df)
+            self._processor1.categorize(df)
 
     def test_empty_dataframe(self):
         df = pd.DataFrame({"description": []})
-        result = self.processor1.categorize(df)
+        result = self._processor1.categorize(df)
         self.assertEqual(len(result), 0)
 
 
@@ -108,14 +108,14 @@ class TestCategorizeRow(BaseProcessorTest):
 
     def test_no_matching_identifiers(self):
         row = pd.Series({"description": "No matching identifier"})
-        result = self.processor1._categorize_row(row)
+        result = self._processor1._categorize_row(row)
         self.assertEqual(
             result, {"type": Type.NO_TYPE, "category": Processor.NO_CATEGORY}
         )
 
     def test_one_matching_identifier(self):
         row = pd.Series({"description": "1234 payment_company_1"})
-        result = self.processor1._categorize_row(row)
+        result = self._processor1._categorize_row(row)
         self.assertEqual(result, {"type": "income", "category": "income source 1"})
 
     def test_multiple_matching_identifiers(self):
@@ -123,7 +123,7 @@ class TestCategorizeRow(BaseProcessorTest):
             {"description": "Contains payment_company_1 and payment_company_2"}
         )
         with self.assertRaises(ValueError):
-            self.processor1._categorize_row(row)
+            self._processor1._categorize_row(row)
 
 
 class TestFindMatchingIdentifiers(BaseProcessorTest):

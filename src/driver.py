@@ -7,6 +7,8 @@ from cli.printer import Printer
 from engine.calculator import Calculator
 from engine.config_loader import ConfigLoader
 from engine.parser import BOADebitParser, ChaseCreditParser
+from flp.flp_calculator import FLPCalculator
+from flp.flp_dataset import Dataset
 import logging
 
 from engine.processor import Processor
@@ -59,7 +61,9 @@ def main():
         dataframes.append(df)
 
     combined_df = pd.concat(dataframes)
-    calculator = Calculator(args.household_size, args.percentile, combined_df)
+    calculator = Calculator(
+        FLPCalculator(Dataset()), args.household_size, args.percentile, combined_df
+    )
     display_stats(printer, calculator)
 
 
@@ -86,38 +90,38 @@ def get_matching_processor(filename: str, processors: list[Processor]) -> Proces
 def display_stats(printer: Printer, calculator: Calculator) -> None:
     printer.print_line()
     print(
-        f"You have stored { printer.color_string(Fore.YELLOW, f"{calculator.giving_total:.2f}") } as treasure this month"
+        f"You have stored { printer.color_string(Fore.YELLOW, f"{calculator._giving_total:.2f}") } as treasure this month"
     )
     printer.print_line()
-    print(f"In: {calculator.income_total:.2f}")
-    print(f"Expenses: {calculator.expense_total:.2f}")
-    print(f"Giving: {calculator.giving_total:.2f}")
-    print(f"In - Out: {printer.format_delta(f"{calculator.in_minus_out:.2f}")}")
+    print(f"In: {calculator.income_total():.2f}")
+    print(f"Expenses: {calculator.expense_total():.2f}")
+    print(f"Giving: {calculator.giving_total():.2f}")
+    print(f"In - Out: {printer.format_delta(f"{calculator.in_minus_out():.2f}")}")
     printer.print_line()
     print(
-        f"Your line is { printer.color_string(Back.BLUE, f"{calculator.line:.2f}") } "
+        f"Your line is { printer.color_string(Back.BLUE, f"{calculator.line():.2f}") } "
     )
     print(
-        f"Line - Expenses: {printer.format_delta(f"{calculator.line_minus_expenses:.2f}")}"
+        f"Line - Expenses: {printer.format_delta(f"{calculator.line_minus_expenses():.2f}")}"
     )
 
     printer.print_line()
     print("Income by breakdown:")
-    print(calculator.income_by_category)
+    print(calculator.income_by_category())
 
     printer.print_line()
     print("Expenses by breakdown:")
-    print(calculator.expense_by_category)
+    print(calculator.expense_by_category())
 
     printer.print_line()
     print("Giving by breakdown:")
-    print(calculator.giving_by_category)
+    print(calculator.giving_by_category())
 
     printer.print_line()
     print(
         "Transactions that did not match any identifiers. Please update the config or the row to make them match an identifier:"
     )
-    print(calculator.no_type_rows_string)
+    print(calculator.no_type_rows().to_string(index=False))
 
     # 'commit' the change here to the file database
 
