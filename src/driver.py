@@ -6,7 +6,7 @@ from cli.argparse import get_args
 from cli.printer import Printer
 from engine.calculator import Calculator
 from engine.config_loader import ConfigLoader
-from engine.parser import BOADebitParser, ChaseCreditParser
+from engine.parser import BOADebitParser, ChaseCreditParser, CitiCreditParser
 from flp.flp_calculator import FLPCalculator
 from flp.flp_dataset import Dataset
 import logging
@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 PARSER_BY_FORMAT = {
     "boa_debit": BOADebitParser(),
     "chase_credit": ChaseCreditParser(),
+    "citi_credit": CitiCreditParser(),
     "chase_debit": None,
 }
 
@@ -106,15 +107,15 @@ def display_stats(printer: Printer, calculator: Calculator) -> None:
     )
 
     printer.print_line()
-    print("Income by breakdown:")
+    print("Income by category:")
     print(calculator.income_by_category())
 
     printer.print_line()
-    print("Expenses by breakdown:")
+    print("Expenses by category:")
     print(calculator.expense_by_category())
 
     printer.print_line()
-    print("Giving by breakdown:")
+    print("Giving by category:")
     print(calculator.giving_by_category())
 
     printer.print_line()

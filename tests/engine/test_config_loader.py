@@ -2,6 +2,7 @@ import pathlib
 import unittest
 from engine.config_loader import ConfigLoader
 from engine.processor import Processor
+from engine.type import Type
 
 
 class BaseConfigLoaderTest(unittest.TestCase):
@@ -31,10 +32,10 @@ class TestLoadProcessors(BaseConfigLoaderTest):
                     parser="mock_parser1",
                     skip_transactions=["auto pay"],
                     type_category_by_identifier={
-                        "payment_company_1": ("income", "income source 1"),
-                        "payment_company_2": ("income", "income source 2"),
-                        "volunteer 1": ("giving", "non profit 1"),
-                        "payment_company_1_expense": ("expense", "misc expenses"),
+                        "payment_company_1": (Type.INCOME, "income source 1"),
+                        "payment_company_2": (Type.INCOME, "income source 2"),
+                        "volunteer 1": (Type.GIVING, "non profit 1"),
+                        "payment_company_1_expense": (Type.EXPENSE, "misc expenses"),
                     },
                 ),
                 Processor(
@@ -43,9 +44,9 @@ class TestLoadProcessors(BaseConfigLoaderTest):
                     parser="mock_parser2",
                     skip_transactions=["miscellaneous"],
                     type_category_by_identifier={
-                        "store_1": ("expense", "groceries"),
-                        "store_2": ("expense", "groceries"),
-                        "payment_company_1": ("expense", "misc expenses"),
+                        "store_1": (Type.EXPENSE, "groceries"),
+                        "store_2": (Type.EXPENSE, "groceries"),
+                        "payment_company_1": (Type.EXPENSE, "misc expenses"),
                     },
                 ),
             ],
@@ -86,12 +87,11 @@ class TestExtractInvertedCategories(BaseConfigLoaderTest):
         }
 
         expected_result = {
-            "payment_company_1": ("income", "income source 1"),
-            "payment_company_2": ("income", "income source 2"),
-            "volunteer 1": ("giving", "non profit 1"),
-            "payment_company_1_expense": ("expense", "misc expenses"),
+            "payment_company_1": (Type.INCOME, "income source 1"),
+            "payment_company_2": (Type.INCOME, "income source 2"),
+            "volunteer 1": (Type.GIVING, "non profit 1"),
+            "payment_company_1_expense": (Type.EXPENSE, "misc expenses"),
         }
-
         self.assertEqual(
             expected_result,
             self._config_loader._extract_inverted_categories(categories1, "mock_name"),
@@ -108,10 +108,10 @@ class TestExtractInvertedCategories(BaseConfigLoaderTest):
         }
 
         expected_result = {
-            "payment_company_1": ("income", "income source 1"),
-            "payment_company_2": ("income", "income source 2"),
-            "volunteer 1": ("giving", "non profit 1"),
-            "payment_company_1_expense": ("expense", "misc expenses"),
+            "payment_company_1": (Type.INCOME, "income source 1"),
+            "payment_company_2": (Type.INCOME, "income source 2"),
+            "volunteer 1": (Type.GIVING, "non profit 1"),
+            "payment_company_1_expense": (Type.EXPENSE, "misc expenses"),
         }
 
         self.assertEqual(
@@ -126,9 +126,9 @@ class TestExtractInvertedCategories(BaseConfigLoaderTest):
 
     def test_invalid_processor(self):
         invalid_categories = {
-            "income": {},
-            "giving": {},
-            "expense": {
+            Type.INCOME: {},
+            Type.GIVING: {},
+            Type.EXPENSE: {
                 "utilities": ["store_1", "electricity"],
                 "groceries": ["store_1", "store_2"],
             },

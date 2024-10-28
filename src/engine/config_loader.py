@@ -1,5 +1,6 @@
 from engine.parser import Parser
 from engine.processor import Processor
+from engine.type import Type
 import json
 import logging
 from collections import defaultdict, Counter
@@ -84,29 +85,32 @@ class ConfigLoader:
 
     def _extract_inverted_categories(
         self,
-        identifiers_by_categories_by_type: dict[str, dict[str, list]],
+        identifiers_by_categories_by_typestr: dict[str, dict[str, list]],
         processor_name: str,
-    ) -> dict[str, tuple[str, str]]:
+    ) -> dict[str, tuple[Type, str]]:
         """
-        Inverts the identifiers_by_categories_by_type dictionary from the configuration file
+        Inverts the identifiers_by_categories_by_typestr dictionary from the configuration file
         into a dictionary mapping each identifier to a tuple of (type, category).
 
         Raises a ValueError if any identifier is found in multiple categories.
 
-        :param identifiers_by_categories_by_type: A dictionary mapping each type to a dictionary
+        :param identifiers_by_categories_by_typestr: A dictionary mapping each type to a dictionary
             mapping each category to a list of identifiers.
         :param processor_name: The name of the processor in the configuration file.
         :return: A dictionary mapping each identifier to a tuple of (type, category).
         """
-        type_category_by_identifier = self._invert_dict(
-            identifiers_by_categories_by_type
+        matching_typestr_category_list_by_identifier = self._invert_dict(
+            identifiers_by_categories_by_typestr
         )
-        # turn the keys of type_category_by_identifier into lowercase
-        type_category_by_identifier = {
-            k.lower(): v for k, v in type_category_by_identifier.items()
+        # turn the keys of matching_typestr_category_list_by_identifier into lowercase
+        matching_typestr_category_list_by_identifier = {
+            k.lower(): v
+            for k, v in matching_typestr_category_list_by_identifier.items()
         }
         multiple_type_category_by_identifier = {
-            k: v for k, v in type_category_by_identifier.items() if len(v) > 1
+            k: v
+            for k, v in matching_typestr_category_list_by_identifier.items()
+            if len(v) > 1
         }
         if multiple_type_category_by_identifier:
             for identifier, keys in multiple_type_category_by_identifier.items():
@@ -118,8 +122,8 @@ class ConfigLoader:
             )
 
         return {
-            identifier: single_keys[0]
-            for identifier, single_keys in type_category_by_identifier.items()
+            identifier: (Type(single_keys[0][0]), single_keys[0][1])
+            for identifier, single_keys in matching_typestr_category_list_by_identifier.items()
         }
 
     def _invert_dict(

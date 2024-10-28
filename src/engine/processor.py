@@ -15,7 +15,7 @@ class Processor:
         file_prefix: str,
         parser: Parser,
         skip_transactions: list[str],
-        type_category_by_identifier: dict[str, tuple[str, str]],
+        type_category_by_identifier: dict[str, tuple[Type, str]],
     ):
         self._name = name
         self._file_prefix = file_prefix

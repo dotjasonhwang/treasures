@@ -119,3 +119,22 @@ class ChaseCreditParser(Parser):
         )
         df.columns = df.columns.str.lower()
         return df
+
+
+class CitiCreditParser(Parser):
+    def __init__(self) -> None:
+        super().__init__(False)
+
+    def _parse(self, file_path: str) -> pd.DataFrame:
+        df = pd.read_csv(
+            file_path,
+            usecols=["Date", "Description", "Debit", "Credit"],
+            dtype={"Debit": float, "Credit": float},
+            parse_dates=["Date"],
+        )
+        return df
+
+    def _rename_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        df["amount"] = df["Debit"].fillna(df["Credit"])
+        df.columns = df.columns.str.lower()
+        return df
