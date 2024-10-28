@@ -15,6 +15,12 @@ from engine.processor import Processor
 
 logger = logging.getLogger(__name__)
 
+PARSER_BY_FORMAT = {
+    "boa_debit": BOADebitParser(),
+    "chase_credit": ChaseCreditParser(),
+    "chase_debit": None,
+}
+
 
 def main():
     # initialize colorama
@@ -23,14 +29,8 @@ def main():
     args = get_args()
     file_dir = args.file_dir
 
-    parser_by_format = {
-        "boa_debit": BOADebitParser(),
-        "chase_credit": ChaseCreditParser(),
-        "chase_debit": None,
-    }
-
     printer.print_message_with_checkmark("Starting up")
-    config_loader = ConfigLoader(args.config_file, parser_by_format)
+    config_loader = ConfigLoader(args.config_file, PARSER_BY_FORMAT)
     nickname_by_filename = config_loader.load_nickname_by_filename()
     processors = config_loader.load_processors()
     dataframes = []

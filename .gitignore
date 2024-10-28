@@ -11,6 +11,7 @@ venv
 *.DS_Store
 
 # data
-/data
+/data/*
+!/data/config.json
 
 LOCAL_README.md

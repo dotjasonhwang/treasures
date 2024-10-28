@@ -82,8 +82,7 @@ The year is 2023. I am working on my budgeting game. Commercial applications are
 
 The Financial Finish Line is a monthly number that the Finish Line Pledge computes using household size, target percentile, and a variety of data sources. See [The Finish Line Pledge](https://www.finishlinepledge.com) for a full breakdown as well as a wealth of valuable content and resources.
 
-Matthew 6:19-21:
-“Do not store up for yourselves treasures on earth, where moths and vermin destroy, and where thieves break in and steal. But store up for yourselves treasures in heaven, where moths and vermin do not destroy, and where thieves do not break in and steal. For where your treasure is, there your heart will be also."
+_Matthew 6:19-21: “Do not store up for yourselves treasures on earth, where moths and vermin destroy, and where thieves break in and steal. But store up for yourselves treasures in heaven, where moths and vermin do not destroy, and where thieves do not break in and steal. For where your treasure is, there your heart will be also."_
 
 **Disclaimer**: This is a personal project that I have tested for my own use case, and I do not guarantee correct results. Please feel free to contact me if you have any questions.
 
@@ -93,8 +92,63 @@ Matthew 6:19-21:
 
 1. Make sure your environment is set up to run Python3
 2. `pip install -r requirements.txt`
+3. (recommended) initialize & activate your virtual environment
+
+You are now ready to run treasures.
 
 ## Usage
+
+1. Config File
+
+- Where you configure how transaction files should get processed, and set nicknames for transaction files. Example:
+
+```
+{
+  "file_nicknames": {
+    "example_file1.csv": "Example Acc Name 1",
+    "example_file2.csv": "Example Acc Name 2"
+  },
+  "processors": [
+    {
+      "name": "PROCESSOR NAME 1",
+      "file_prefix": "example_file",
+      "file_format": "boa_debit",
+      "skip_transactions": ["IDENTIFIER_0"],
+      "categories": {
+        "income": {
+          "INCOME_CATEGORY_1": ["IDENTIFIER_1", "IDENTIFIER_2"]
+        },
+        "giving": {
+          "GIVING_CATEGORY_1": ["IDENTIFIER_3", "IDENTIFIER_4"]
+        },
+        "expense": {
+          "EXPENSE_CATEGORY_1": ["IDENTIFIER_5", "IDENTIFIER_6"]
+        }
+      }
+    }
+  ]
+}
+```
+
+FILE_DIR files should be named "example_file1.csv" or "example_file2.csv", with corresponding account_names "Example Acc Name 1" and "Example Acc Name 2". We have defined 1 `Processor`, which will match files that start with `example_file`. The parser for those files will be the value of `boa_debit` in [`PARSER_BY_FORMAT`](src/driver.py), which is [`BOADebitParser`](src/engine/parser.py). Transactions containing `IDENTIFIER_0` in the `Description` column (case insensitive) will be skipped. Transactions containing `IDENTIFIER_1` or `IDENTIFIER_2` in the `Description` column (case insensitive) will be categorized as `INCOME_CATEGORY_1`, and type `Type.INCOME`. Apply the same categorization and typing for `IDENTIFIER`s 3-6.
+
+1. Processing logic
+
+- Processor names must be unique
+- Within a processor:
+  - The identifiers defined in `skip_transactions` take priority over the identifiers defined in `categories`.
+  - The identifiers defined in `categories` are enforced to be unique.
+  - Transactions and identifiers are matched case insensitively.
+  - The categories themselves will retain case.
+  - Some banks represent spending in positive numbers, and other banks represent spending in negative numbers. To properly handle refunds and credits, we cannot assume the direction of a transaction amount based on type (income vs expense). Therefore, the parsers in [`src/engine/parser.py`](src/engine/parser.py) utilize a flag to indicate whether the raw file contains income as positive or negative.
+
+1. Transaction Files
+
+- Rename your transaction files in `FILE_DIR` to
+  - Match a single `file_nicknames` key, and
+  - Match a single file_prefix in the `processors` list
+
+1. Running Treasures
 
 ```
 usage: driver.py [-h] -n HOUSEHOLD_SIZE -p PERCENTILE -f FILE_DIR -c CONFIG_FILE

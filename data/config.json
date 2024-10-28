@@ -1,0 +1,25 @@
+{
+  "file_nicknames": {
+    "example_file1.csv": "Example Acc Name 1",
+    "example_file2.csv": "Example Acc Name 2"
+  },
+  "processors": [
+    {
+      "name": "PROCESSOR NAME 1",
+      "file_prefix": "example_file",
+      "file_format": "boa_debit",
+      "skip_transactions": ["IDENTIFIER_0"],
+      "categories": {
+        "income": {
+          "INCOME_CATEGORY_1": ["IDENTIFIER_1", "IDENTIFIER_2"]
+        },
+        "giving": {
+          "GIVING_CATEGORY_1": ["IDENTIFIER_3", "IDENTIFIER_4"]
+        },
+        "expense": {
+          "EXPENSE_CATEGORY_1": ["IDENTIFIER_5", "IDENTIFIER_6"]
+        }
+      }
+    }
+  ]
+}
