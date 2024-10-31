@@ -12,6 +12,7 @@ venv
 
 # data
 /data/*
+!/data/flp
 !/data/config.json
 
 LOCAL_README.md

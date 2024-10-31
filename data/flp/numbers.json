@@ -1,0 +1,21 @@
+{
+    "poverty": {
+        "povLineBase": 9440,
+        "povLinePerPerson": 5140
+    },
+    "avgHouseholdSize": 2.51,
+    "state_income_tax_rate": 0.0340,
+    "fica": {
+        "socSecRate": 0.0620,
+        "socSecMaxIncome": 160200,
+        "medicareRate": 0.0145
+    },
+    "deductions": {
+        "INDIVIDUAL": 13850,
+        "JOINT": 27700
+    },
+    "federal_tax_brackets": {
+        "INDIVIDUAL": "data/flp/bracket_indiv.csv",
+        "JOINT": "data/flp/bracket_joint.csv"
+    }
+}
