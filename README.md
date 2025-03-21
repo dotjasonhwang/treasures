@@ -53,10 +53,11 @@ SOFTWARE.
 <div align="center">
   <a href="https://github.com/dotjasonhwang/treasures">
     <img src="readme-assets/logo.png" alt="Logo" width="80" height="80">
-    <h1 align="center">treasures</h1>
+    
   </a>
+  <h1 align="center">treasures</h1>
 
-  <h3 align="center">where moths and vermin do not destroy, and where thieves do not break in and steal</h3>
+  <p align="center">where moths and vermin do not destroy, and where thieves do not break in and steal</p>
 </div>
 
 <!-- TABLE OF CONTENTS -->
@@ -100,7 +101,7 @@ You are now ready to run treasures.
 
 1. Config File
 
-- Where you configure how transaction files should get processed, and set nicknames for transaction files. Example:
+-   Where you configure how transaction files should get processed, and set nicknames for transaction files. Example:
 
 ```
 {
@@ -134,19 +135,19 @@ FILE_DIR files should be named "example_file1.csv" or "example_file2.csv", with 
 
 1. Processing logic
 
-- Processor names must be unique
-- Within a processor:
-  - The identifiers defined in `skip_transactions` take priority over the identifiers defined in `categories`.
-  - The identifiers defined in `categories` are enforced to be unique.
-  - Transactions and identifiers are matched case insensitively.
-  - The categories themselves will retain case.
-  - Some banks represent spending in positive numbers, and other banks represent spending in negative numbers. To properly handle refunds and credits, we cannot assume the direction of a transaction amount based on type (income vs expense). Therefore, the parsers in [`src/engine/parser.py`](src/engine/parser.py) utilize a flag to indicate whether the raw file contains income as positive or negative.
+-   Processor names must be unique
+-   Within a processor:
+    -   The identifiers defined in `skip_transactions` take priority over the identifiers defined in `categories`.
+    -   The identifiers defined in `categories` are enforced to be unique.
+    -   Transactions and identifiers are matched case insensitively.
+    -   The categories themselves will retain case.
+    -   Some banks represent spending in positive numbers, and other banks represent spending in negative numbers. To properly handle refunds and credits, we cannot assume the direction of a transaction amount based on type (income vs expense). Therefore, the parsers in [`src/engine/parser.py`](src/engine/parser.py) utilize a flag to indicate whether the raw file contains income as positive or negative.
 
 1. Transaction Files
 
-- Rename your transaction files in `FILE_DIR` to
-  - Match a single `file_nicknames` key, and
-  - Match a single file_prefix in the `processors` list
+-   Rename your transaction files in `FILE_DIR` to
+    -   Match a single `file_nicknames` key, and
+    -   Match a single file_prefix in the `processors` list
 
 1. Running Treasures
 
@@ -194,13 +195,13 @@ Jason Hwang<br>
 
 ## Acknowledgments
 
-- [The Finish Line Pledge](https://www.finishlinepledge.com)
-  - For the encouragement to walk a more meaningful financial road
-  - For the original source code for the "line" calculation
-- [othneildrew/Best-README-Template][readme-template-url]
-  - For the README template
-- The first cohort of Breath
-  - For your genuine and life-giving energy that one special weekend
+-   [The Finish Line Pledge](https://www.finishlinepledge.com)
+    -   For the encouragement to walk a more meaningful financial road
+    -   For the original source code for the "line" calculation
+-   [othneildrew/Best-README-Template][readme-template-url]
+    -   For the README template
+-   The first cohort of Breath
+    -   For your genuine and life-giving energy that one special weekend
 
 <!-- MARKDOWN LINKS -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
