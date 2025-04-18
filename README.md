@@ -52,7 +52,7 @@ SOFTWARE.
 <br />
 <div align="center">
   <a href="https://github.com/dotjasonhwang/treasures">
-    <img src="readme-assets/logo.png" alt="Logo" width="80" height="80">
+    <img src="readme-assets/treasures.png" alt="Logo" width="256" height="256" style="margin-bottom: 10px">
     
   </a>
   <h1 align="center">treasures</h1>
